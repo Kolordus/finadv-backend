@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  fin-adv-db:
+    image: mongo:latest
+    container_name: "fin-adv-db"
+    ports:
+      - 27017:27017
+
+  fin-adv:
+    depends_on:
+      - fin-adv-db
+    image: fin-adv
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+    links:
+      - fin-adv-db

@@ -1,0 +1,11 @@
+financeController
+
+1. check all exceptions
+2. shoudl get list of all entries
+3. should get by name
+4. if name is incorrect -> exception
+5. delete entry
+6. edit entry
+
+balanceController:
+
