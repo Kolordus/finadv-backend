@@ -2,15 +2,19 @@ package pl.kolak.finansjera.financeEntity;
 
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pl.kolak.finansjera.utils.InvalidDataException;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FinanceDataService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(FinanceDataService.class);
 
     private final FinanceEntryRepository financeEntryRepository;
     private static final List<String> whiteList = List.of("pau", "jack");
@@ -40,12 +44,24 @@ public class FinanceDataService {
             throw new InvalidDataException("Amount must be positive");
     }
 
-    public void updateFinanceEntry(FinanceEntry entry) {
-        financeEntryRepository.findByDate(entry.getDate()).ifPresent(financeEntry -> {
-            financeEntry.setAmount(entry.getAmount());
-            financeEntry.setDate(entry.getDate());
-            financeEntry.setName(entry.getName());
-        });
+    public FinanceEntry updateFinanceEntry(FinanceEntry newEntry) {
+        FinanceEntry entryBeforeUpdate;
+
+        Optional<FinanceEntry> entryToUpdate = financeEntryRepository.findByDateEquals(newEntry.getDate());
+        if (entryToUpdate.isPresent()) {
+            FinanceEntry entryFound = entryToUpdate.get();
+            entryBeforeUpdate = FinanceEntry.from(entryFound);
+
+            LOG.info("entry before update: {}", entryBeforeUpdate);
+
+            entryFound.updateEntryValues(newEntry);
+            financeEntryRepository.save(entryFound);
+        }
+        else {
+            throw new InvalidDataException("Couldn't find entity with given date");
+        }
+
+        return entryBeforeUpdate;
     }
 
     public void clearEntries() {
@@ -59,17 +75,11 @@ public class FinanceDataService {
 
     // by date because flutter doesnt store data about entry id and most unique is date
     public void deleteEntryOrThrow(FinanceEntry entry) {
-        Optional<FinanceEntry> byDate = financeEntryRepository.findByDate(entry.getDate());
+        Optional<FinanceEntry> byDate = financeEntryRepository.findByDateEquals(entry.getDate());
 
         if (byDate.isPresent())
             financeEntryRepository.delete(entry);
         else
             throw new InvalidDataException("Couldn't find entry with such date: " + entry.getDate());
     }
-
-    @EventListener(ApplicationReadyEvent.class)
-    public void method() {
-
-    }
-
 }

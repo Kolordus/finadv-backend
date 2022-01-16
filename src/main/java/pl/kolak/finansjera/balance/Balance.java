@@ -47,6 +47,13 @@ public class Balance {
         }
     }
 
+    public void revertLastEntry(FinanceEntry entry) {
+        if (entry.getPersonName().equals(this.whoLeads))
+            this.subtractAndHandleIfBalanceUnderZero(entry);
+        else
+            this.balance += entry.getAmount();
+    }
+
     private void subtractFromBalance(int amount) {
         this.balance -= amount;
     }
@@ -104,15 +111,5 @@ public class Balance {
     @Override
     public int hashCode() {
         return Objects.hash(id, balance, whoLeads, date);
-    }
-
-    public class PersonBalance {
-        String name;
-        int balance;
-
-        public PersonBalance(String name, int balance) {
-            this.name = name;
-            this.balance = balance;
-        }
     }
 }

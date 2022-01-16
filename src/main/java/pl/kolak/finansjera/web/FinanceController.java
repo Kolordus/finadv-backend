@@ -45,8 +45,14 @@ class FinanceController {
     }
 
     @PutMapping
-    public ResponseEntity<?> editFinanceEntity(@RequestBody FinanceEntry entry) {
-        financeDataService.updateFinanceEntry(entry);
+    public ResponseEntity<?> editFinanceEntity(@RequestBody FinanceEntry updatedEntry, HttpServletRequest request) {
+        financeDataService.validateData(updatedEntry);
+
+        FinanceEntry entryBeforeUpdate = financeDataService.updateFinanceEntry(updatedEntry);
+
+        balanceService.recalculateBalance(entryBeforeUpdate, updatedEntry);
+
+        LOG.info("From: {} || entry after update: {}", request.getRemoteAddr(), updatedEntry);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -67,7 +73,7 @@ class FinanceController {
     @DeleteMapping("/entry")
     public ResponseEntity<?> deleteEntry(@RequestBody FinanceEntry entry) {
         financeDataService.deleteEntryOrThrow(entry);
-        balanceService.subtractAndSaveBalance(entry);
+        balanceService.revertLastEntry(entry);
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }

@@ -25,6 +25,17 @@ public class FinanceEntry {
         this.amount = amount;
     }
 
+    public static FinanceEntry from(FinanceEntry entry) {
+        return new FinanceEntry(entry.getPersonName(), entry.getDate(), entry.getName(), entry.getAmount());
+    }
+
+    public void updateEntryValues(FinanceEntry entry) {
+        this.setAmount(entry.getAmount());
+        this.setDate(entry.getDate());
+        this.setName(entry.getName());
+    }
+
+    // hibernate
     public String getDate() {
         return date;
     }
@@ -49,14 +60,6 @@ public class FinanceEntry {
         this.amount = amount;
     }
 
-//    public String getId() {
-//        return id;
-//    }
-//
-//    public void setId(String id) {
-//        this.id = id;
-//    }
-
     public String getPersonName() {
         return personName;
     }
@@ -64,7 +67,8 @@ public class FinanceEntry {
     public void setPersonName(String personName) {
         this.personName = personName;
     }
-
+    // hibernate
+    
     @Override
     public String toString() {
         return "FinanceEntry{" +

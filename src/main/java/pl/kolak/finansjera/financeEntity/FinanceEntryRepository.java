@@ -10,5 +10,5 @@ import java.util.Optional;
 interface FinanceEntryRepository extends MongoRepository<FinanceEntry, String> {
 
     Optional<List<FinanceEntry>> findAllByPersonName(String name);
-    Optional<FinanceEntry> findByDate(String date);
+    Optional<FinanceEntry> findByDateEquals(String date);
 }

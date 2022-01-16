@@ -39,6 +39,17 @@ public class BalanceService {
         balanceRepository.save(balance);
     }
 
+    public void recalculateBalance(FinanceEntry entryBeforeUpdate, FinanceEntry updatedEntry) {
+       this.revertLastEntry(entryBeforeUpdate);
+       this.calculateAndSaveBalance(updatedEntry);
+    }
+
+    public void revertLastEntry(FinanceEntry entryBeforeUpdate) {
+        Balance balance = getNewestBalance();
+        balance.revertLastEntry(entryBeforeUpdate);
+        balanceRepository.save(balance);
+    }
+
     public void subtractAndSaveBalance(FinanceEntry newestEntry) {
         Balance balance = getNewestBalance();
         balance.subtractAndHandleIfBalanceUnderZero(newestEntry);
@@ -59,4 +70,5 @@ public class BalanceService {
     private boolean leadingPersonMadeAnotherExpenditure(FinanceEntry newestEntry, Balance balance) {
         return StringUtils.equals(balance.getWhoLeads(), newestEntry.getPersonName());
     }
+
 }
