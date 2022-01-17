@@ -4,32 +4,34 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import pl.kolak.finansjera.financeEntity.FinanceEntry;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Document
 public class Balance {
 
-    public static final Balance EMPTY = new Balance(0, "No one", LocalDate.now());
+    public static final Balance EMPTY = new Balance(0, "No one", LocalDateTime.now());
 
     @Id
     private String id;
 
     private int balance;
     private String whoLeads;
-    private LocalDate date;
+    private LocalDateTime date;
 
     public Balance() { //hibernate
     }
 
     public static Balance createFirstBalance(FinanceEntry entry) {
-        return new Balance(entry.getAmount(), entry.getPersonName(), LocalDate.now());
+        return new Balance(entry.getAmount(), entry.getPersonName(), LocalDateTime.now());
     }
 
-    public Balance(int balance, String whoLeads, LocalDate date) {
+    // defensive copy to assure that new balance is saved, not replaced
+    public static Balance newBalance(Balance balance) {
+        return new Balance(balance.balance, balance.whoLeads, balance.date);
+    }
+
+    public Balance(int balance, String whoLeads, LocalDateTime date) {
         this.balance = balance;
         this.whoLeads = whoLeads;
         this.date = date;
@@ -37,21 +39,6 @@ public class Balance {
 
     public void addToBalance(int amount) {
         this.balance += amount;
-    }
-
-    public void subtractAndHandleIfBalanceUnderZero(FinanceEntry entry) {
-        this.subtractFromBalance(entry.getAmount());
-        if (this.balance <= 0) {
-            this.setWhoLeads(entry.getPersonName());
-            this.balance = Math.abs(this.balance);
-        }
-    }
-
-    public void revertLastEntry(FinanceEntry entry) {
-        if (entry.getPersonName().equals(this.whoLeads))
-            this.subtractAndHandleIfBalanceUnderZero(entry);
-        else
-            this.balance += entry.getAmount();
     }
 
     private void subtractFromBalance(int amount) {
@@ -74,11 +61,11 @@ public class Balance {
         this.balance = balance;
     }
 
-    public LocalDate getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 

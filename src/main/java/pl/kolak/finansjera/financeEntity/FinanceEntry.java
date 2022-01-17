@@ -12,7 +12,7 @@ public class FinanceEntry {
     @Id
     private String date;
     private String personName;
-    private String name;
+    private String operationName;
     private int amount;
 
     public FinanceEntry() { //hibernate
@@ -21,18 +21,18 @@ public class FinanceEntry {
     public FinanceEntry(String personName, String date, String name, int amount) {
         this.personName = personName;
         this.date = date;
-        this.name = name;
+        this.operationName = name;
         this.amount = amount;
     }
 
     public static FinanceEntry from(FinanceEntry entry) {
-        return new FinanceEntry(entry.getPersonName(), entry.getDate(), entry.getName(), entry.getAmount());
+        return new FinanceEntry(entry.getPersonName(), entry.getDate(), entry.getOperationName(), entry.getAmount());
     }
 
     public void updateEntryValues(FinanceEntry entry) {
         this.setAmount(entry.getAmount());
         this.setDate(entry.getDate());
-        this.setName(entry.getName());
+        this.setOperationName(entry.getOperationName());
     }
 
     // hibernate
@@ -44,12 +44,12 @@ public class FinanceEntry {
         this.date = date;
     }
 
-    public String getName() {
-        return name;
+    public String getOperationName() {
+        return operationName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setOperationName(String operationName) {
+        this.operationName = operationName;
     }
 
     public int getAmount() {
@@ -74,7 +74,7 @@ public class FinanceEntry {
         return "FinanceEntry{" +
                 ", personName='" + personName + '\'' +
                 ", date='" + date + '\'' +
-                ", name='" + name + '\'' +
+                ", name='" + operationName + '\'' +
                 ", amount=" + amount +
                 '}';
     }
@@ -84,12 +84,12 @@ public class FinanceEntry {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FinanceEntry that = (FinanceEntry) o;
-        return amount == that.amount && Objects.equals(personName, that.personName) && Objects.equals(date, that.date) && Objects.equals(name, that.name);
+        return amount == that.amount && Objects.equals(personName, that.personName) && Objects.equals(date, that.date) && Objects.equals(operationName, that.operationName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(personName, date, name, amount);
+        return Objects.hash(personName, date, operationName, amount);
     }
 
 }

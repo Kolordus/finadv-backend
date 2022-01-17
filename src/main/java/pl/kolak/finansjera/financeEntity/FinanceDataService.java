@@ -36,7 +36,7 @@ public class FinanceDataService {
     public void validateData(FinanceEntry entry) {
         if (StringUtils.isBlank(entry.getPersonName()) || !whiteList.contains(entry.getPersonName().toLowerCase()))
             throw new InvalidDataException("Person name not accepted or is empty!");
-        if (StringUtils.isBlank(entry.getName()))
+        if (StringUtils.isBlank(entry.getOperationName()))
             throw new InvalidDataException("Name is empty!");
         if (StringUtils.isBlank(entry.getDate()))
             throw new InvalidDataException("No date given");
@@ -44,24 +44,14 @@ public class FinanceDataService {
             throw new InvalidDataException("Amount must be positive");
     }
 
-    public FinanceEntry updateFinanceEntry(FinanceEntry newEntry) {
-        FinanceEntry entryBeforeUpdate;
-
-        Optional<FinanceEntry> entryToUpdate = financeEntryRepository.findByDateEquals(newEntry.getDate());
-        if (entryToUpdate.isPresent()) {
-            FinanceEntry entryFound = entryToUpdate.get();
-            entryBeforeUpdate = FinanceEntry.from(entryFound);
-
-            LOG.info("entry before update: {}", entryBeforeUpdate);
-
-            entryFound.updateEntryValues(newEntry);
-            financeEntryRepository.save(entryFound);
-        }
-        else {
-            throw new InvalidDataException("Couldn't find entity with given date");
-        }
-
-        return entryBeforeUpdate;
+    public void updateEntry(FinanceEntry newEntry) {
+        financeEntryRepository.findByDateEquals(newEntry.getDate()).ifPresentOrElse(entry -> {
+            LOG.info("entry before update: {}", entry);
+            entry.updateEntryValues(newEntry);
+            financeEntryRepository.save(entry);
+        }, () -> {
+            throw new InvalidDataException("no such data!!");
+        });
     }
 
     public void clearEntries() {

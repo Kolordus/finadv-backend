@@ -1,10 +1,13 @@
 package pl.kolak.finansjera.balance;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import pl.kolak.finansjera.financeEntity.FinanceEntry;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static pl.kolak.finansjera.utils.FinanceAppUtils.JACK;
+import static pl.kolak.finansjera.utils.FinanceAppUtils.PAU;
 
 @Service
 public class BalanceService {
@@ -16,45 +19,8 @@ public class BalanceService {
     }
 
     public Balance getNewestBalance() {
-        Optional<Balance> newestBalance = balanceRepository.findAll().stream()
-                .min((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-
-        return newestBalance
-                .orElse(Balance.EMPTY);
-    }
-
-    public void calculateAndSaveBalance(FinanceEntry newestEntry) {
-        Balance balance = getNewestBalance();
-
-        if (balance.equals(Balance.EMPTY)) {
-            balanceRepository.save(Balance.createFirstBalance(newestEntry));
-            return ;
-        }
-
-        if (leadingPersonMadeAnotherExpenditure(newestEntry, balance))
-            balance.addToBalance(newestEntry.getAmount());
-        else
-            balance.subtractAndHandleIfBalanceUnderZero(newestEntry);
-
-        balanceRepository.save(balance);
-    }
-
-    public void recalculateBalance(FinanceEntry entryBeforeUpdate, FinanceEntry updatedEntry) {
-       this.revertLastEntry(entryBeforeUpdate);
-       this.calculateAndSaveBalance(updatedEntry);
-    }
-
-    public void revertLastEntry(FinanceEntry entryBeforeUpdate) {
-        Balance balance = getNewestBalance();
-        balance.revertLastEntry(entryBeforeUpdate);
-        balanceRepository.save(balance);
-    }
-
-    public void subtractAndSaveBalance(FinanceEntry newestEntry) {
-        Balance balance = getNewestBalance();
-        balance.subtractAndHandleIfBalanceUnderZero(newestEntry);
-
-        balanceRepository.save(balance);
+        List<Balance> balances = balanceRepository.findAll();
+        return balances.size() > 0 ? balances.get(balances.size() - 1) : Balance.EMPTY;
     }
 
     public void clearBalances() {
@@ -66,9 +32,31 @@ public class BalanceService {
         this.clearBalances();
         return newestBalance;
     }
-    
-    private boolean leadingPersonMadeAnotherExpenditure(FinanceEntry newestEntry, Balance balance) {
-        return StringUtils.equals(balance.getWhoLeads(), newestEntry.getPersonName());
+
+    public void setNewestBalance(Balance balance) {
+        balanceRepository.save(balance);
     }
 
+    public void recalculateAndClearBalances(List<FinanceEntry> allFinanceEntries) {
+        balanceRepository.deleteAll();
+
+        int sumForPau = getSumForPerson(PAU, allFinanceEntries);
+        int sumForJack = getSumForPerson(JACK, allFinanceEntries);
+
+        int amountBalance = sumForPau - sumForJack;
+
+        Balance balanceToSave = Balance.EMPTY;
+
+        if (amountBalance > 0) balanceToSave = new Balance(amountBalance, PAU, LocalDateTime.now());
+        if (amountBalance < 0) balanceToSave = new Balance(Math.abs(amountBalance), JACK, LocalDateTime.now());
+
+        setNewestBalance(balanceToSave);
+    }
+
+    private int getSumForPerson(String personName, List<FinanceEntry> allFinanceEntries) {
+        return allFinanceEntries.stream()
+                .filter(entry -> entry.getPersonName().equals(personName))
+                .mapToInt(FinanceEntry::getAmount)
+                .sum();
+    }
 }

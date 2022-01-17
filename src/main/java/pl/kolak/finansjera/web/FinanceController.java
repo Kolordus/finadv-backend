@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.kolak.finansjera.balance.Balance;
 import pl.kolak.finansjera.balance.BalanceService;
 import pl.kolak.finansjera.financeEntity.FinanceDataService;
 import pl.kolak.finansjera.financeEntity.FinanceEntry;
@@ -27,7 +28,7 @@ class FinanceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FinanceEntry>> getAllData(HttpServletRequest request) {
+    public ResponseEntity<List<FinanceEntry>> getAllFinanceEntries(HttpServletRequest request) {
         List<FinanceEntry> allFinanceEntries = financeDataService.getAllFinanceEntries();
 
         LOG.info("From: {} ||  returned entries amount: {}", request.getRemoteAddr(), allFinanceEntries.size());
@@ -38,7 +39,7 @@ class FinanceController {
     public ResponseEntity<?> saveFinanceEntity(@RequestBody FinanceEntry newestEntry, HttpServletRequest request) {
         financeDataService.validateData(newestEntry);
         financeDataService.saveFinanceEntry(newestEntry);
-        balanceService.calculateAndSaveBalance(newestEntry);
+        balanceService.recalculateAndClearBalances(financeDataService.getAllFinanceEntries());
 
         LOG.info("From: {} || saved entity: {}", request.getRemoteAddr(), newestEntry);
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -47,10 +48,9 @@ class FinanceController {
     @PutMapping
     public ResponseEntity<?> editFinanceEntity(@RequestBody FinanceEntry updatedEntry, HttpServletRequest request) {
         financeDataService.validateData(updatedEntry);
+        financeDataService.updateEntry(updatedEntry);
 
-        FinanceEntry entryBeforeUpdate = financeDataService.updateFinanceEntry(updatedEntry);
-
-        balanceService.recalculateBalance(entryBeforeUpdate, updatedEntry);
+        balanceService.recalculateAndClearBalances(financeDataService.getAllFinanceEntries());
 
         LOG.info("From: {} || entry after update: {}", request.getRemoteAddr(), updatedEntry);
 
@@ -59,9 +59,13 @@ class FinanceController {
 
     @DeleteMapping
     public ResponseEntity<?> deleteAllEntriesAndGetNewestBalance() {
-        financeDataService.clearEntries();
+        Balance balance = Balance.newBalance(balanceService.getNewestBalance());
 
-        return ResponseEntity.ok(balanceService.getNewestBalance());
+        financeDataService.clearEntries();
+        balanceService.clearBalances();
+        balanceService.setNewestBalance(balance);
+
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/{name}")
@@ -73,14 +77,9 @@ class FinanceController {
     @DeleteMapping("/entry")
     public ResponseEntity<?> deleteEntry(@RequestBody FinanceEntry entry) {
         financeDataService.deleteEntryOrThrow(entry);
-        balanceService.revertLastEntry(entry);
+        balanceService.recalculateAndClearBalances(financeDataService.getAllFinanceEntries());
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
-    }
-
-    @GetMapping("/kurwa")
-    public String method() {
-        return "kurwa";
     }
 
 }
