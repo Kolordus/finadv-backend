@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/finance")
-class FinanceController {
+public class FinanceController {
 
     private static final Logger LOG = LoggerFactory.getLogger(FinanceController.class);
 

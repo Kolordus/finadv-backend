@@ -22,10 +22,6 @@ public class Balance {
     public Balance() { //hibernate
     }
 
-    public static Balance createFirstBalance(FinanceEntry entry) {
-        return new Balance(entry.getAmount(), entry.getPersonName(), LocalDateTime.now());
-    }
-
     // defensive copy to assure that new balance is saved, not replaced
     public static Balance newBalance(Balance balance) {
         return new Balance(balance.balance, balance.whoLeads, balance.date);
