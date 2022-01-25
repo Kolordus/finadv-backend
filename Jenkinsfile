@@ -23,4 +23,3 @@ pipeline {
          }
      }
  }
-//  sh mvn heroku:deploy -> swoj wlasny plugin dziabnąć
