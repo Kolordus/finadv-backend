@@ -1,4 +1,4 @@
-\pipeline {
+pipeline {
      agent any
 
      tools {
@@ -23,5 +23,4 @@
          }
      }
  }
-
 //  sh mvn heroku:deploy -> swoj wlasny plugin dziabnąć
