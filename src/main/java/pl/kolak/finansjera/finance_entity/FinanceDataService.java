@@ -1,4 +1,4 @@
-package pl.kolak.finansjera.financeEntity;
+package pl.kolak.finansjera.finance_entity;
 
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,7 +17,6 @@ public class FinanceDataService {
     private static final Logger LOG = LoggerFactory.getLogger(FinanceDataService.class);
 
     private final FinanceEntryRepository financeEntryRepository;
-    private static final List<String> whiteList = List.of("pau", "jack");
 
     public FinanceDataService(FinanceEntryRepository financeEntryRepository) {
         this.financeEntryRepository = financeEntryRepository;
@@ -27,21 +26,10 @@ public class FinanceDataService {
         return financeEntryRepository.findAll();
     }
 
-    public void saveFinanceEntry(FinanceEntry entry) {
+    public void createFinanceEntry(FinanceEntry entry) {
         entry.setPersonName(entry.getPersonName().toLowerCase());
 
         financeEntryRepository.save(entry);
-    }
-
-    public void validateData(FinanceEntry entry) {
-        if (StringUtils.isBlank(entry.getPersonName()) || !whiteList.contains(entry.getPersonName().toLowerCase()))
-            throw new InvalidDataException("Person name not accepted or is empty!");
-        if (StringUtils.isBlank(entry.getOperationName()))
-            throw new InvalidDataException("Name is empty!");
-        if (StringUtils.isBlank(entry.getDate()))
-            throw new InvalidDataException("No date given");
-        if (entry.getAmount() <= 0)
-            throw new InvalidDataException("Amount must be positive");
     }
 
     public void updateEntry(FinanceEntry newEntry) {
@@ -49,8 +37,10 @@ public class FinanceDataService {
             LOG.info("entry before update: {}", entry);
             entry.updateEntryValues(newEntry);
             financeEntryRepository.save(entry);
+            LOG.info("entry after update: {}", entry);
+
         }, () -> {
-            throw new InvalidDataException("no such data!!");
+            throw new InvalidDataException("no such entry");
         });
     }
 
@@ -58,7 +48,7 @@ public class FinanceDataService {
         financeEntryRepository.deleteAll();
     }
 
-    public List<FinanceEntry> getAllFinanceEntriesByName(String name) {
+    public List<FinanceEntry> readAllFinanceEntriesByName(String name) {
         return financeEntryRepository.findAllByPersonName(name)
                 .orElse(Collections.emptyList());
     }

@@ -11,15 +11,15 @@ pipeline {
                 sh 'mvn clean compile'
             }
         }
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'not ready yet'
-            }
-        }
+//         stage('Test') {
+//             steps {
+//                 sh 'mvn test'
+//             }
+//         }
+//         stage('Deploy') {
+//             steps {
+//                 echo 'not ready yet'
+//             }
+//         }
     }
 }

@@ -21,12 +21,16 @@ class BalanceController {
 
     @GetMapping("/clean")
     public ResponseEntity<Balance> cleanBalanceAndGetLastBalance() {
-        return ResponseEntity.ok(balanceService.cleanEntriesAndGetLastBalance());
+        return balanceService.cleanEntriesAndGetLastBalance()
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.ok(Balance.EMPTY));
     }
 
     @GetMapping
     public ResponseEntity<Balance> getNewestBalance() {
-        return ResponseEntity.ok(balanceService.getNewestBalance());
+        return balanceService.getNewestBalance()
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.ok(Balance.EMPTY));
     }
 
     @DeleteMapping

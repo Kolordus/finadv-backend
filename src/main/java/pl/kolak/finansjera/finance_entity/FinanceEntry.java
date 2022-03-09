@@ -1,22 +1,33 @@
-package pl.kolak.finansjera.financeEntity;
+package pl.kolak.finansjera.finance_entity;
 
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Objects;
+
+import static pl.kolak.finansjera.utils.FinanceAppStrings.*;
 
 @Document
 public class FinanceEntry {
-
+    
     @Id
+    @NotBlank(message = CANNOT_BE_EMPTY)
     private String date;
-    private String personName;
-    private String operationName;
-    private int amount;
 
-    public FinanceEntry() { //hibernate
-    }
+    @Pattern(regexp = PAU_OR_JACK_REGEX)
+    private String personName;
+
+    @NotBlank(message = CANNOT_BE_EMPTY)
+    private String operationName;
+
+    @NotNull
+    @PositiveOrZero(message = MUST_BE_MORE_THAN_ZERO)
+    private int amount;
 
     public FinanceEntry(String personName, String date, String name, int amount) {
         this.personName = personName;
@@ -36,6 +47,9 @@ public class FinanceEntry {
     }
 
     // hibernate
+    public FinanceEntry() {
+    }
+
     public String getDate() {
         return date;
     }
@@ -68,7 +82,7 @@ public class FinanceEntry {
         this.personName = personName;
     }
     // hibernate
-    
+
     @Override
     public String toString() {
         return "FinanceEntry{" +

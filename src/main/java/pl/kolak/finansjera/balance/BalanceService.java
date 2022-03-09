@@ -1,13 +1,14 @@
 package pl.kolak.finansjera.balance;
 
 import org.springframework.stereotype.Service;
-import pl.kolak.finansjera.financeEntity.FinanceEntry;
+import pl.kolak.finansjera.finance_entity.FinanceEntry;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-import static pl.kolak.finansjera.utils.FinanceAppUtils.JACK;
-import static pl.kolak.finansjera.utils.FinanceAppUtils.PAU;
+import static pl.kolak.finansjera.utils.FinanceAppStrings.JACK;
+import static pl.kolak.finansjera.utils.FinanceAppStrings.PAU;
 
 @Service
 public class BalanceService {
@@ -18,19 +19,18 @@ public class BalanceService {
         this.balanceRepository = balanceRepository;
     }
 
-    public Balance getNewestBalance() {
+    public Optional<Balance> getNewestBalance() {
         List<Balance> balances = balanceRepository.findAll();
-        return balances.size() > 0 ? balances.get(balances.size() - 1) : Balance.EMPTY;
+        return Optional.ofNullable(balances.get(balances.size() - 1));
     }
 
     public void clearBalances() {
         balanceRepository.deleteAll();
     }
 
-    public Balance cleanEntriesAndGetLastBalance() {
-        Balance newestBalance = getNewestBalance();
+    public Optional<Balance> cleanEntriesAndGetLastBalance() {
         this.clearBalances();
-        return newestBalance;
+        return getNewestBalance();
     }
 
     public void setNewestBalance(Balance balance) {

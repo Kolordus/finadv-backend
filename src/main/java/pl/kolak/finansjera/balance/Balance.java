@@ -2,7 +2,6 @@ package pl.kolak.finansjera.balance;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import pl.kolak.finansjera.financeEntity.FinanceEntry;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

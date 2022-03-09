@@ -1,0 +1,5 @@
+###
+POST http://localhost:8080/finance
+Content-Type: application/json
+
+{"personName":"Padu","operationName":"","date":"2022-01-08 23:11:07.784817","amount":-1224}
