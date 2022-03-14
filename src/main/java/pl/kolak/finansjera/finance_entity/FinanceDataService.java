@@ -1,7 +1,6 @@
 package pl.kolak.finansjera.finance_entity;
 
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,7 +31,7 @@ public class FinanceDataService {
         financeEntryRepository.save(entry);
     }
 
-    public void updateEntry(FinanceEntry newEntry) {
+    public void updateEntryOrThrow(FinanceEntry newEntry) {
         financeEntryRepository.findByDateEquals(newEntry.getDate()).ifPresentOrElse(entry -> {
             LOG.info("entry before update: {}", entry);
             entry.updateEntryValues(newEntry);
@@ -40,7 +39,7 @@ public class FinanceDataService {
             LOG.info("entry after update: {}", entry);
 
         }, () -> {
-            throw new InvalidDataException("no such entry");
+            throw new InvalidDataException("no such finance entry");
         });
     }
 
@@ -53,13 +52,12 @@ public class FinanceDataService {
                 .orElse(Collections.emptyList());
     }
 
-    // by date because flutter doesnt store data about entry id and most unique is date
-    public void deleteEntryOrThrow(FinanceEntry entry) {
-        Optional<FinanceEntry> byDate = financeEntryRepository.findByDateEquals(entry.getDate());
+    public Optional<FinanceEntry> findEntry(FinanceEntry entry) {
+        return financeEntryRepository.findByDateEquals(entry.getDate());
+    }
 
-        if (byDate.isPresent())
-            financeEntryRepository.delete(entry);
-        else
-            throw new InvalidDataException("Couldn't find entry with such date: " + entry.getDate());
+    // by date because flutter doesnt store data about entry id and most unique is date
+    public void deleteEntry(FinanceEntry entry) {
+        financeEntryRepository.delete(entry);
     }
 }

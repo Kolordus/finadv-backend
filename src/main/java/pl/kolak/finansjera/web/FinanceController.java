@@ -5,9 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.kolak.finansjera.balance.BalanceService;
 import pl.kolak.finansjera.finance_entity.FinanceDataService;
@@ -15,9 +12,7 @@ import pl.kolak.finansjera.finance_entity.FinanceEntry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/finance")
@@ -42,8 +37,19 @@ public class FinanceController {
         return new ResponseEntity<>(allFinanceEntries, HttpStatus.OK);
     }
 
+    @GetMapping("/{name}")
+    public ResponseEntity<List<FinanceEntry>> getAllDataByName(@PathVariable String name, HttpServletRequest request) {
+
+        LOG.info("From: {} || returned entries by name: {}", request.getRemoteAddr(), name);
+
+        return new ResponseEntity<>(financeDataService.readAllFinanceEntriesByName(name.toLowerCase()),
+                HttpStatus.OK);
+    }
+
     @PostMapping
-    public ResponseEntity<?> saveFinanceEntity(@Valid @RequestBody FinanceEntry newestEntry, HttpServletRequest request) {
+    public ResponseEntity<?> saveFinanceEntity(
+            @Valid @RequestBody FinanceEntry newestEntry,
+            HttpServletRequest request) {
         financeDataService.createFinanceEntry(newestEntry);
         balanceService.recalculateAndClearBalances(financeDataService.getAllFinanceEntries());
 
@@ -53,8 +59,10 @@ public class FinanceController {
     }
 
     @PutMapping
-    public ResponseEntity<?> editFinanceEntity(@Valid @RequestBody FinanceEntry updatedEntry, HttpServletRequest request) {
-        financeDataService.updateEntry(updatedEntry);
+    public ResponseEntity<?> editFinanceEntity(
+            @Valid @RequestBody FinanceEntry updatedEntry,
+            HttpServletRequest request) {
+        financeDataService.updateEntryOrThrow(updatedEntry);
         balanceService.recalculateAndClearBalances(financeDataService.getAllFinanceEntries());
 
         LOG.info("From: {} || entry after update: {}", request.getRemoteAddr(), updatedEntry);
@@ -64,28 +72,23 @@ public class FinanceController {
 
     @DeleteMapping
     public ResponseEntity<?> deleteAllEntriesAndGetNewestBalance() {
-        return balanceService.getNewestBalance()
-                       .map(balance -> {
-                           financeDataService.clearEntries();
-                           balanceService.clearBalances();
-                           balanceService.setNewestBalance(balance);
-                           
-                           return new ResponseEntity<>(HttpStatus.ACCEPTED);
-                       })
-               .orElse(ResponseEntity.noContent().build());
-    }
-
-    @GetMapping("/{name}")
-    public ResponseEntity<List<FinanceEntry>> getAllDataByName(@PathVariable String name) {
-        return new ResponseEntity<>(financeDataService.readAllFinanceEntriesByName(name.toLowerCase()),
-                HttpStatus.OK);
+        financeDataService.clearEntries();
+        balanceService.clearBalances();
+        balanceService.setNewestBalance(balanceService.getNewestBalance());
+        
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/entry")
-    public ResponseEntity<?> deleteEntry(@Valid @RequestBody FinanceEntry entry) {
-        financeDataService.deleteEntryOrThrow(entry);
-        balanceService.recalculateAndClearBalances(financeDataService.getAllFinanceEntries());
+    public ResponseEntity<?> deleteEntry(
+            @Valid @RequestBody FinanceEntry entryToDelete) {
+        return financeDataService.findEntry(entryToDelete)
+                .map(entry -> {
+                    financeDataService.deleteEntry(entryToDelete);
+                    balanceService.recalculateAndClearBalances(financeDataService.getAllFinanceEntries());
 
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                    return new ResponseEntity<>(HttpStatus.OK);
+                })
+                .orElse(new ResponseEntity<>("No such finance entry", HttpStatus.NOT_FOUND));
     }
 }

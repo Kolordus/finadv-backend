@@ -8,6 +8,6 @@ import java.util.Optional;
 @Repository
 interface StuffRequestRepository extends MongoRepository<StuffRequest, String> {
     
-    boolean deleteByDate(String date);
+    long deleteByDate(String date);
     Optional<StuffRequest> findByDateEquals(String date);
 }

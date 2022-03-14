@@ -1,4 +1,4 @@
-package pl.kolak.finansjera.web.exceptions;
+package pl.kolak.finansjera.web.validationhandler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,9 +16,6 @@ public class ValidationExceptionHandler {
     /*
         jeśli chcę sobie to ogarniac tylko dla jednego controllera to tylko tam umieszczam tę metodę
         jeśli chcę dla wszystkich to adnotacja jak powyżej
-
-
-        validacja wywala ten konkretny błąd który jest przechwycony przez aspekt!
      */
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)

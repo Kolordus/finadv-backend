@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,10 +19,8 @@ import org.testcontainers.utility.DockerImageName;
 import pl.kolak.finansjera.balance.BalanceService;
 import pl.kolak.finansjera.finance_entity.FinanceDataService;
 import pl.kolak.finansjera.finance_entity.FinanceEntry;
-import pl.kolak.finansjera.web.FinanceController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

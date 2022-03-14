@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StuffRequestService {
@@ -14,27 +15,20 @@ public class StuffRequestService {
     public StuffRequestService(StuffRequestRepository stuffRequestRepository) {
         this.repository = stuffRequestRepository;
     }
-    
+
     public void createStuffRequest(StuffRequest request) {
         repository.save(request);
     }
 
-    public List<StuffRequest> readAllStuffReuqest() {
+    public List<StuffRequest> readAllStuffRequests() {
         return repository.findAll();
     }
-    
-    public void updateStuffRequest(StuffRequest request) {
         
-//        repository.findByDateEquals(request.getDate()).ifPresentOrElse(reqToUpdate -> {
-//            // TODO logger - jak wyglądało przedtem
-//            reqToUpdate.setUpdatedValues(request);
-//            repository.save(reqToUpdate);
-//        });
-//
-//        return ;
+    public void deleteStuffRequestByDate(String date) {
+        repository.deleteByDate(date);
     }
-    
-    public boolean deleteStuffRequestByDate(String date) {
-        return repository.deleteByDate(date);
+
+    public Optional<StuffRequest> findByDate(String date) {
+        return repository.findByDateEquals(date);
     }
 }

@@ -19,16 +19,17 @@ public class BalanceService {
         this.balanceRepository = balanceRepository;
     }
 
-    public Optional<Balance> getNewestBalance() {
+    public Balance getNewestBalance() {
         List<Balance> balances = balanceRepository.findAll();
-        return Optional.ofNullable(balances.get(balances.size() - 1));
+        return Optional.ofNullable(balances.get(balances.size() - 1))
+                .orElse(Balance.EMPTY);
     }
 
     public void clearBalances() {
         balanceRepository.deleteAll();
     }
 
-    public Optional<Balance> cleanEntriesAndGetLastBalance() {
+    public Balance cleanEntriesAndGetLastBalance() {
         this.clearBalances();
         return getNewestBalance();
     }

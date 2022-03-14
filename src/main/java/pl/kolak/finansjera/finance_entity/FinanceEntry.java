@@ -19,6 +19,7 @@ public class FinanceEntry {
     @NotBlank(message = CANNOT_BE_EMPTY)
     private String date;
 
+    @NotBlank(message = CANNOT_BE_EMPTY)
     @Pattern(regexp = PAU_OR_JACK_REGEX)
     private String personName;
 
