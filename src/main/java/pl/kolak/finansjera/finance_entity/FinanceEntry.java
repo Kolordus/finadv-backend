@@ -8,6 +8,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.PositiveOrZero;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import static pl.kolak.finansjera.utils.FinanceAppStrings.*;
@@ -28,9 +29,9 @@ public class FinanceEntry {
 
     @NotNull
     @PositiveOrZero(message = MUST_BE_MORE_THAN_ZERO)
-    private int amount;
+    private BigDecimal amount;
 
-    public FinanceEntry(String personName, String date, String name, int amount) {
+    public FinanceEntry(String personName, String date, String name, BigDecimal amount) {
         this.personName = personName;
         this.date = date;
         this.operationName = name;
@@ -67,11 +68,11 @@ public class FinanceEntry {
         this.operationName = operationName;
     }
 
-    public int getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

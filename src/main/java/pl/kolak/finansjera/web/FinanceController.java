@@ -37,12 +37,12 @@ public class FinanceController {
         return new ResponseEntity<>(allFinanceEntries, HttpStatus.OK);
     }
 
-    @GetMapping("/{name}")
-    public ResponseEntity<List<FinanceEntry>> getAllDataByName(@PathVariable String name, HttpServletRequest request) {
+    @GetMapping("/{personName}")
+    public ResponseEntity<List<FinanceEntry>> getAllDataByPersonName(@PathVariable String personName, HttpServletRequest request) {
 
-        LOG.info("From: {} || returned entries by name: {}", request.getRemoteAddr(), name);
-
-        return new ResponseEntity<>(financeDataService.readAllFinanceEntriesByName(name.toLowerCase()),
+        LOG.info("From: {} || returned entries for: {}", request.getRemoteAddr(), personName);
+        
+        return new ResponseEntity<>(financeDataService.readAllFinanceEntriesByName(personName.toLowerCase()),
                 HttpStatus.OK);
     }
 
@@ -71,21 +71,25 @@ public class FinanceController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteAllEntriesAndGetNewestBalance() {
+    public ResponseEntity<?> deleteAllEntriesAndGetNewestBalance(HttpServletRequest request) {
         financeDataService.clearEntries();
-        balanceService.clearBalances();
-        balanceService.setNewestBalance(balanceService.getNewestBalance());
+        balanceService.entitiesToTheBalance();
+
+        LOG.info("From: {} || performed CLEAR ENTRIES and get BALANCE", request.getRemoteAddr());
         
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/entry")
     public ResponseEntity<?> deleteEntry(
-            @Valid @RequestBody FinanceEntry entryToDelete) {
+            @Valid @RequestBody FinanceEntry entryToDelete,
+            HttpServletRequest request) {
         return financeDataService.findEntry(entryToDelete)
                 .map(entry -> {
                     financeDataService.deleteEntry(entryToDelete);
                     balanceService.recalculateAndClearBalances(financeDataService.getAllFinanceEntries());
+                    
+                    LOG.info("From: {} || deleted entry {}", request.getRemoteAddr(), entryToDelete);
 
                     return new ResponseEntity<>(HttpStatus.OK);
                 })

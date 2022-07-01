@@ -1,9 +1,15 @@
 package pl.kolak.finansjera.balance;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.Objects;
 
 @Document
@@ -11,11 +17,17 @@ public class Balance {
 
     public static final Balance EMPTY = new Balance(0, "No one", LocalDateTime.now());
 
+    
+    Comparator<Balance> COMP = Comparator.comparingInt(value -> value.balance);
     @Id
     private String id;
 
     private int balance;
     private String whoLeads;
+
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SS")
     private LocalDateTime date;
 
     public Balance() { //hibernate

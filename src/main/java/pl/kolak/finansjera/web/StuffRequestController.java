@@ -45,10 +45,13 @@ public class StuffRequestController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteStuffRequest(@RequestParam String date) {
+    public ResponseEntity<?> deleteStuffRequest(@RequestParam String date, HttpServletRequest httpReq) {
         return service.findByDate(date)
                 .map(request -> {
                     service.deleteStuffRequestByDate(date);
+                    
+                    LOG.info("From: {} || deleted entry: {}", httpReq.getRemoteAddr(), request);
+                    
                     return new ResponseEntity<>(HttpStatus.OK);
                 })
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
