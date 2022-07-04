@@ -28,8 +28,10 @@ public class BalanceService {
     }
 
     public Balance cleanEntriesAndGetLastBalance() {
+        Balance newestBalance = getNewestBalance();
         this.clearBalances();
-        return getNewestBalance();
+
+        return newestBalance;
     }
 
     public void setNewestBalance(Balance balance) {
